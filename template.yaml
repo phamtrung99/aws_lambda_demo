@@ -11,6 +11,7 @@ Globals:  # defines properties that are common to all your serverless functions 
     Environment:
       Variables:
         REGION: !Ref AWS::Region
+        JWT_SECRET_KEY: !Sub "{{resolve:ssm:${Params}/jwt_secret_key:1}}"
 
 Resources:
   ApiGateway:
@@ -28,7 +29,6 @@ Resources:
     Properties:
       CodeUri: functions/getHome
       Handler: getHome
-      Runtime: go1.x
       Events:
         CatchAll:
           Type: Api
@@ -42,7 +42,6 @@ Resources:
     Properties:
       CodeUri: functions/myAuthFunction
       Handler: myAuthFunction
-      Runtime: go1.x
 
 
 

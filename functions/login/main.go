@@ -15,15 +15,28 @@ import (
 	"go.uber.org/zap"
 )
 
+type LoginRequest struct {
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
 func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	logger, _ := zap.NewDevelopment()
 	headers := utils.NewHeaders()
+	loginRequest := &LoginRequest{}
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 
 	errRes := events.APIGatewayProxyResponse{
 		StatusCode: http.StatusInternalServerError,
 		Headers:    headers,
 	}
+
+	if err := json.Unmarshal([]byte(request.Body), loginRequest); err != nil {
+		logger.Sugar().DPanic(err)
+		return errRes, nil
+	}
+
+	
 
 	clientToken := strings.TrimSpace(strings.TrimPrefix(request.Headers["Authorization"], "Bearer "))
 	logger.Debug("Client token: " + clientToken)
