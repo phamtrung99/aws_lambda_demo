@@ -19,6 +19,7 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 	logger, _ := zap.NewDevelopment()
 	headers := utils.NewHeaders()
 	secretKey := os.Getenv("JWT_SECRET_KEY")
+	logger.Debug("HOME secretKey: " + secretKey)
 
 	errRes := events.APIGatewayProxyResponse{
 		StatusCode: http.StatusInternalServerError,
@@ -26,7 +27,7 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 	}
 
 	clientToken := strings.TrimSpace(strings.TrimPrefix(request.Headers["Authorization"], "Bearer "))
-	logger.Debug("Client token: " + clientToken)
+	logger.Debug("HOME Client token: " + clientToken)
 
 	tokenService := services.NewTokenService(secretKey)
 	payload, err := tokenService.Decode(clientToken)
