@@ -1,0 +1,51 @@
+#https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy.html
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31  # Required, identifies AWS SAM template file
+
+Globals:  # defines properties that are common to all your serverless functions and APIs
+  Function:
+    Timeout: 5
+    MemorySize: 256
+    Runtime: go1.x
+    Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+    Environment:
+      Variables:
+        REGION: !Ref AWS::Region
+
+Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api   # Type of resource, more: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-resources-and-properties.html
+    Properties:
+      StageName: dev
+      Auth: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-controlling-access-to-apis-lambda-authorizer.html
+        DefaultAuthorizer: MyLambdaTokenAuthorizer
+        Authorizers:
+          MyLambdaTokenAuthorizer:
+            FunctionArn: !GetAtt MyAuthFunction.Arn
+
+  GetHomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/getHome
+      Handler: getHome
+      Runtime: nodejs12.x
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /home
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  MyAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/myAuthFunction
+      Handler: myAuthFunction
+      Runtime: go1.x
+
+
+
+
+
+
