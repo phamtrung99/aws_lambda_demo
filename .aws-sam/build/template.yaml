@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 256
+    Runtime: go1.x
+    Tracing: Active
+    Environment:
+      Variables:
+        REGION:
+          Ref: AWS::Region
+Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Auth:
+        DefaultAuthorizer: MyLambdaTokenAuthorizer
+        Authorizers:
+          MyLambdaTokenAuthorizer:
+            FunctionArn:
+              Fn::GetAtt:
+              - MyAuthFunction
+              - Arn
+  GetHomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GetHomeFunction
+      Handler: getHome
+      Runtime: go1.x
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /home
+            Method: GET
+            RestApiId:
+              Ref: ApiGateway
+    Metadata:
+      SamResourceId: GetHomeFunction
+  MyAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: MyAuthFunction
+      Handler: myAuthFunction
+      Runtime: go1.x
+    Metadata:
+      SamResourceId: MyAuthFunction

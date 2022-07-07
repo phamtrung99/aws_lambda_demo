@@ -28,7 +28,7 @@ Resources:
     Properties:
       CodeUri: functions/getHome
       Handler: getHome
-      Runtime: nodejs12.x
+      Runtime: go1.x
       Events:
         CatchAll:
           Type: Api
