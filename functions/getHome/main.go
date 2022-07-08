@@ -20,6 +20,7 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 	headers := utils.NewHeaders()
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	logger.Debug("HOME secretKey: " + secretKey)
+	logger.Sugar().Info(request)
 
 	errRes := events.APIGatewayProxyResponse{
 		StatusCode: http.StatusInternalServerError,

@@ -19,7 +19,7 @@ func NewTokenService(key string) TokenService {
 
 type TokenPayload struct {
 	UserID int64  `json:"user_id"`
-	Email  string `json:"user_name"`
+	Email  string `json:"email"`
 	jwt.StandardClaims
 }
 

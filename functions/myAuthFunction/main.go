@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -38,17 +39,17 @@ func generatePolicy(principalId, effect, resource string) events.APIGatewayCusto
 func handle(ctx context.Context, request events.APIGatewayCustomAuthorizerRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
 	logger, _ := zap.NewDevelopment()
 	secretKey := os.Getenv("JWT_SECRET_KEY")
+	logger.Debug("JWT_SECRET_KEY" + secretKey)
 
-	// clientToken := strings.TrimSpace(strings.TrimPrefix(request.Headers["Authorization"], "Bearer "))
-	clientToken := request.AuthorizationToken
+	//clientToken := strings.TrimSpace(strings.TrimPrefix(request.Headers["Authorization"], "Bearer "))
+	clientToken := strings.TrimSpace(strings.TrimPrefix(request.AuthorizationToken, "Bearer "))
 	logger.Debug("Client token: " + clientToken)
 
 	tokenService := services.NewTokenService(secretKey)
 	_, err := tokenService.Decode(clientToken)
-	logger.Debug("Error: " + err.Error())
 	if err != nil {
-		logger.Sugar().Panic(err)
-		return events.APIGatewayCustomAuthorizerResponse{}, err
+		logger.Debug("Error: " + err.Error())
+		return generatePolicy("user", "Deny", request.MethodArn), nil
 	}
 
 	return generatePolicy("user", "Allow", request.MethodArn), nil
