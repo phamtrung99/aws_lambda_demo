@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func generatePolicy(principalId, effect, resource string) events.APIGatewayCustomAuthorizerResponse {
+func generatePolicy(principalId, effect, resource string, errorMessage string) events.APIGatewayCustomAuthorizerResponse {
 	authResponse := events.APIGatewayCustomAuthorizerResponse{PrincipalID: principalId}
 
 	if effect != "" && resource != "" {
@@ -29,9 +29,7 @@ func generatePolicy(principalId, effect, resource string) events.APIGatewayCusto
 
 	// Optional output with custom properties of the String, Number or Boolean type.
 	authResponse.Context = map[string]interface{}{
-		"stringKey":  "stringval",
-		"numberKey":  123,
-		"booleanKey": true,
+		"error_message": errorMessage,
 	}
 	return authResponse
 }
@@ -49,10 +47,10 @@ func handle(ctx context.Context, request events.APIGatewayCustomAuthorizerReques
 	_, err := tokenService.Decode(clientToken)
 	if err != nil {
 		logger.Debug("Error: " + err.Error())
-		return generatePolicy("user", "Deny", request.MethodArn), nil
+		return generatePolicy("user", "Deny", request.MethodArn, err.Error()), nil
 	}
 
-	return generatePolicy("user", "Allow", request.MethodArn), nil
+	return generatePolicy("user", "Allow", request.MethodArn, ""), nil
 }
 
 func main() {
